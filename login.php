@@ -11,16 +11,34 @@
     }
 
     $status = "";
-    $email = $_POST['email'] ?? '';
-    $password = $_POST['password'] ?? '';
+    if(in_array($_SERVER['REQUEST_METHOD'],['POST'])){
+        $email = htmlspecialchars($_POST['email']) ?? '';
+        $password = htmlspecialchars($_POST['password']) ?? '';
+    }
     if($_SERVER['REQUEST_METHOD'] === 'POST'){
-        if(authenticate($email , $password)){
-            $_SESSION['email']=$email;
-            redirect("admin"); 
-            die();
+        if(empty($email)){
+            $status ="email is required <br />";
+        }else if(!filter_var($email,FILTER_VALIDATE_EMAIL)){
+            $status .="email is invalid <br />";
+        }
+        if(empty($password)){
+            $status .= "password is required <br />";
         }
         else{
-            $status = "The provided credentals didn't work";
+            if(strlen($password <= 8)){
+                $status .= "password must be more than 8 characters <br />";
+            }
+           
+            }
+        if(empty($status)){
+            if(authenticate($email , $password)){
+                $_SESSION['email']=$email;
+                redirect("admin"); 
+                die();
+            }
+            else{
+                $status = "The provided credentals didn't work";
+            }
         }
     }
 ?>
